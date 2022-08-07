@@ -7,7 +7,7 @@ function waitMilliseconds(ms: number) {
 
 async function printChar(char: string) {
     const contentBytes = new TextEncoder().encode(char);
-    await waitMilliseconds(300).then(() => {
+    await waitMilliseconds(200).then(() => {
         writeAllSync(Deno.stdout, contentBytes);
     });
 }
@@ -18,6 +18,26 @@ export async function printWithAnimation(wordlist: Array<string>) {
     }
     console.log();
 }
+
+
+export async function printAllAttempts(guesses: Array<Array<string>>, currentAttempt: number, maxAttempts: number) {
+    for (let i = 0; i < maxAttempts; i++) {
+        if (guesses[i] !== undefined) {
+            if (i+1 == currentAttempt) {
+                await printWithAnimation(guesses[i]);
+            }
+            else console.log(guesses[i].join(" "));
+        }
+        else {
+            console.log(
+                `${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")
+                } ${style.bgBlack("   ")} ${style.bgBlack("   ")}`,
+            );
+        }
+        console.log();
+    }
+}
+
 export function formatWithColors(userWord: string, toGuess: string) {
     // Printing word animation
     const formattedWord: Array<string> = [];

@@ -1,61 +1,52 @@
 import * as style from "colors";
-import { formatWithColors, printWithAnimation } from "./printing.ts";
+import { formatWithColors, printAllAttempts } from "./printing.ts";
 
+let WORD_TO_GUESS: string;
 const MAX_TRIES = 6;
 const WORD_LENGTH = 5;
 let currentAttempt = 0;
 
 const previosGuesses: Array<Array<string>> = [];
 
-async function printAllAttempts(guesses: Array<Array<string>>) {
-    for (let i = 0; i < MAX_TRIES; i++) {
-        if (guesses[i] !== undefined) {
-            if (i == currentAttempt) await printWithAnimation(guesses[i]);
-            else console.log(guesses[i].join(" "));
-        }
-        else {
-            console.log(
-                `${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")
-                } ${style.bgBlack("   ")} ${style.bgBlack("   ")}`,
-            );
-        }
-        console.log();
-    }
+async function printWordleUI() {
+    console.clear();
+    console.log(style.white("    W o r d l e\n"));
+    await printAllAttempts(previosGuesses, currentAttempt, MAX_TRIES);
 }
 
 async function game() {
-    const { Response: WORD_TO_GUESS } = await fetchWord() as { Response: string };
+    WORD_TO_GUESS = (await fetchWord()).Response;
+    let currentUserWord = "";
+
     while (true) {
-        console.clear();
-        console.log(style.brightMagenta("Welcome to deno-wordle!"));
-        console.log(`Secret: ${WORD_TO_GUESS}`);
-        await printAllAttempts(previosGuesses);
-        const userWord = prompt(">")?.toLowerCase() || "";
 
-        const { error, valid } = validateWord(userWord);
-
-        if (valid) {
-            const attempt = formatWithColors(userWord, WORD_TO_GUESS);
-            previosGuesses.push(attempt);
-            console.clear();
-            console.log(style.brightMagenta("Welcome to deno-wordle!"));
-            console.log(`Secret: ${WORD_TO_GUESS}`);
-            await printAllAttempts(previosGuesses);
-            
-            if (userWord === WORD_TO_GUESS) {
-                console.log("You win!");
-                break;
-            }
-            currentAttempt++;
-            if (currentAttempt >= MAX_TRIES) {
-                console.log("You lose!");
-                break;
-            }
+        await printWordleUI();
+        if (currentUserWord === WORD_TO_GUESS) {
+            console.log(`You win! (${currentAttempt}/${MAX_TRIES})`);
+            break;
         }
-        else {
-            console.log(error);
+        if (currentAttempt >= MAX_TRIES) {
+            console.log(`${style.gray("Was:")} ${style.italic(WORD_TO_GUESS)}`);
+            break;
+        }
+        
+        while (true) {
+            currentUserWord = prompt(">")?.toLowerCase() || "";
+            
+            const { error, valid } = validateWord(currentUserWord);
+            
+            if (valid) {
+                const attempt = formatWithColors(currentUserWord, WORD_TO_GUESS);
+                previosGuesses.push(attempt);
+                currentAttempt++;
+                break;
+            }
+            else {
+                console.log(error);
+            }
         }
     }
+
 }
 
 function validateWord(word: string): { error?: string, valid: boolean } {
@@ -66,7 +57,7 @@ function validateWord(word: string): { error?: string, valid: boolean } {
     return { error: "", valid: true };
 }
 
-async function fetchWord() {
+async function fetchWord(): Promise<{ Response: string }> {
     console.log(style.brightBlack("Fetching word..."));
     const response = fetch("https://thatwordleapi.azurewebsites.net/get/");
     const res = await response;
