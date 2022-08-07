@@ -1,5 +1,6 @@
 import * as style from "colors";
 import { writeAllSync } from "conversion";
+import { WORD_LENGTH } from "./index.ts"
 
 function waitMilliseconds(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -19,7 +20,6 @@ export async function printWithAnimation(wordlist: Array<string>) {
     console.log();
 }
 
-
 export async function printAllAttempts(guesses: Array<Array<string>>, currentAttempt: number, maxAttempts: number) {
     for (let i = 0; i < maxAttempts; i++) {
         if (guesses[i] !== undefined) {
@@ -29,10 +29,11 @@ export async function printAllAttempts(guesses: Array<Array<string>>, currentAtt
             else console.log(guesses[i].join(" "));
         }
         else {
-            console.log(
-                `${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")
-                } ${style.bgBlack("   ")} ${style.bgBlack("   ")}`,
-            );
+            let empty = "";
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                empty += `${style.bgBlack("   ")} `;
+            }
+            console.log(empty);
         }
         console.log();
     }

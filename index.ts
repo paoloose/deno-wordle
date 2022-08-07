@@ -3,7 +3,7 @@ import { formatWithColors, printAllAttempts } from "./printing.ts";
 
 let WORD_TO_GUESS: string;
 const MAX_TRIES = 6;
-const WORD_LENGTH = 5;
+export const WORD_LENGTH = 5;
 let currentAttempt = 0;
 
 const previousGuesses: Array<Array<string>> = [];
