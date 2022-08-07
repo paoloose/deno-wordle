@@ -6,12 +6,13 @@ const MAX_TRIES = 6;
 const WORD_LENGTH = 5;
 let currentAttempt = 0;
 
-const previosGuesses: Array<Array<string>> = [];
+const previousGuesses: Array<Array<string>> = [];
+const previousPlainGuesses: Array<string> = [];
 
 async function printWordleUI() {
     console.clear();
     console.log(style.white("    W o r d l e\n"));
-    await printAllAttempts(previosGuesses, currentAttempt, MAX_TRIES);
+    await printAllAttempts(previousGuesses, currentAttempt, MAX_TRIES);
 }
 
 async function game() {
@@ -36,23 +37,23 @@ async function game() {
             const { error, valid } = validateWord(currentUserWord);
             
             if (valid) {
+                previousPlainGuesses.push(currentUserWord);
                 const attempt = formatWithColors(currentUserWord, WORD_TO_GUESS);
-                previosGuesses.push(attempt);
+                previousGuesses.push(attempt);
                 currentAttempt++;
                 break;
             }
             else {
-                console.log(error);
+                console.log(style.gray(error!));
             }
         }
     }
-
 }
 
 function validateWord(word: string): { error?: string, valid: boolean } {
     if (!word) return { error: "Empty word", valid: false };
     if (word.length !== WORD_LENGTH) return { error: "Not the length", valid: false };
-    //if (previosGuesses.includes(word)) return { error: "Already tried", valid: false };
+    if (previousPlainGuesses.includes(word)) return { error: "Already tried", valid: false };
     if (!/^[a-zA-Z]+$/.test(word)) return { error: "Not a valid word", valid: false };
     return { error: "", valid: true };
 }

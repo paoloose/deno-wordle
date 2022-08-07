@@ -56,7 +56,6 @@ export function formatWithColors(userWord: string, toGuess: string) {
             }
         }
         formattedWord.push(formattedChar);
-        //await printChar(formattedChar);
     }
     console.log();
     return formattedWord;
