@@ -1,5 +1,5 @@
-import * as style from "https://deno.land/std@0.146.0/fmt/colors.ts";
-import { formatWithColors, printWithAnimation } from "./printing.ts"
+import * as style from "colors";
+import { formatWithColors, printWithAnimation } from "./printing.ts";
 
 const MAX_TRIES = 6;
 const WORD_LENGTH = 5;
@@ -14,14 +14,16 @@ async function printAllAttempts(guesses: Array<Array<string>>) {
             else console.log(guesses[i].join(" "));
         }
         else {
-            console.log(`${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")}`);
+            console.log(
+                `${style.bgBlack("   ")} ${style.bgBlack("   ")} ${style.bgBlack("   ")
+                } ${style.bgBlack("   ")} ${style.bgBlack("   ")}`,
+            );
         }
         console.log();
     }
 }
 
 async function game() {
-
     const { Response: WORD_TO_GUESS } = await fetchWord() as { Response: string };
     while (true) {
         console.clear();
@@ -31,7 +33,7 @@ async function game() {
         const userWord = prompt(">")?.toLowerCase() || "";
 
         const { error, valid } = validateWord(userWord);
-        
+
         if (valid) {
             const attempt = formatWithColors(userWord, WORD_TO_GUESS);
             previosGuesses.push(attempt);
@@ -57,7 +59,6 @@ async function game() {
 }
 
 function validateWord(word: string): { error?: string, valid: boolean } {
-
     if (!word) return { error: "Empty word", valid: false };
     if (word.length !== WORD_LENGTH) return { error: "Not the length", valid: false };
     //if (previosGuesses.includes(word)) return { error: "Already tried", valid: false };
