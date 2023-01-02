@@ -1,5 +1,7 @@
 import * as style from "colors";
 import { formatWithColors, printAllAttempts } from "./printing.ts";
+import { todaysDate } from "./date.ts";
+import { todayAttempt } from "./localStorage.ts"
 
 let WORD_TO_GUESS: string;
 const MAX_TRIES = 6;
@@ -7,22 +9,24 @@ export const WORD_LENGTH = 5;
 let currentAttempt = 0;
 
 // Arrays of words where each word is splited in letters with colors
-const previousGuesses: Array<Array<string>> = [];
+let previousGuesses: Array<Array<string>> = [];
 // Array of plain words
-const previousPlainGuesses: Array<string> = [];
+let previousPlainGuesses: Array<string> = [];
 
-async function printWordleUI() {
-  console.clear();
-  console.log(style.white("    W o r d l e\n"));
-  await printAllAttempts(previousGuesses, currentAttempt, MAX_TRIES);
+async function main() {
+  if (todayAttempt) {
+    previousGuesses = todayAttempt.previousGuesses ?? [];
+    previousPlainGuesses = todayAttempt.previousPlainGuesses ?? [];
+    await printWordleUI();
+    console.log("Come back tomorrow!");
+    return 0;
+  }
+  game();
 }
 
-function todaysDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, "0");
-  const day = today.getDate().toString().padStart(2, "0");
-  return `${year}-${month}-${day}`
+async function printWordleUI() {
+  console.log(style.white("    W o r d l e\n"));
+  await printAllAttempts(previousGuesses, currentAttempt, MAX_TRIES);
 }
 
 async function game() {
@@ -33,6 +37,10 @@ async function game() {
     await printWordleUI();
     if (currentUserWord === WORD_TO_GUESS) {
       console.log(`You win! (${currentAttempt}/${MAX_TRIES})`);
+      window.localStorage.setItem(todaysDate(), JSON.stringify({
+        previousGuesses,
+        previousPlainGuesses
+      }));
       break;
     }
     if (currentAttempt >= MAX_TRIES) {
@@ -50,6 +58,7 @@ async function game() {
         const attempt = formatWithColors(currentUserWord, WORD_TO_GUESS);
         previousGuesses.push(attempt);
         currentAttempt++;
+        console.log(previousGuesses)
         break;
       }
       else {
@@ -84,4 +93,4 @@ async function fetchWordleAPI(): Promise<{ solution: string }> {
   return APIdata;
 }
 
-game();
+main();
